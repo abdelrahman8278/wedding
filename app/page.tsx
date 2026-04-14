@@ -11,9 +11,12 @@ export default function Home() {
 
     const handleOpen = () => {
         setOpen(true)
+        // audio playback temporarily disabled
+        /*
         if (audioRef.current) {
             audioRef.current.play().catch(err => console.log("Audio play blocked:", err))
         }
+        */
     }
 
     // Floating particles component
@@ -47,7 +50,7 @@ export default function Home() {
 
     return (
         <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-rose-50 to-yellow-50 overflow-hidden relative">
-            <audio ref={audioRef} loop src="/music.mp3" />
+            {/* <audio ref={audioRef} loop src="/music.mp3" /> */}
             
             <Particles />
             
