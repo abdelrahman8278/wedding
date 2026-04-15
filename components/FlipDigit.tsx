@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 export default function FlipDigit({ value }: { value: number }) {
   return (
-    <div className="relative w-9 h-14 sm:w-12 sm:h-18 bg-pink-900 rounded-xl overflow-hidden shadow-2xl border border-pink-700/50 flex items-center justify-center">
+    <div className="relative w-7 h-11 sm:w-12 sm:h-18 bg-pink-900 rounded-lg sm:rounded-xl overflow-hidden shadow-2xl border border-pink-700/50 flex items-center justify-center">
       {/* Decorative center line */}
       <div className="absolute w-full h-[2px] bg-black/40 top-1/2 -translate-y-1/2 z-20" />
       
@@ -22,7 +22,7 @@ export default function FlipDigit({ value }: { value: number }) {
             ease: [0.4, 0, 0.2, 1],
             opacity: { duration: 0.2 }
           }}
-          className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-tighter"
+          className="text-xl sm:text-4xl font-serif font-bold text-white tracking-tighter"
         >
           {value}
         </motion.div>

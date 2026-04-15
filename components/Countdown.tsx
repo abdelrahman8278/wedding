@@ -32,7 +32,7 @@ export default function Countdown({ date }: { date?: string }) {
         باقي على يومنا الجميل 💍
       </h2>
 
-      <div className="flex gap-4 sm:gap-6">
+      <div className="flex gap-2 sm:gap-6">
         <TimeBox label="Days" value={time.days} />
         <TimeBox label="Hours" value={time.hours} />
         <TimeBox label="Min" value={time.minutes} />
