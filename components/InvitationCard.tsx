@@ -4,7 +4,15 @@ import { motion } from 'framer-motion'
 import Countdown from './Countdown'
 import GuestForm from './GuestForm'
 
-export default function InvitationCard() {
+export default function InvitationCard({
+    id,
+    groom,
+    bride,
+    message,
+    date,
+    location_name,
+    location_city
+}: any) {
     const containerVariants = {
         hidden: { opacity: 0, scale: 0.95 },
         visible: {
@@ -24,6 +32,13 @@ export default function InvitationCard() {
             opacity: 1
         }
     }
+
+    const formattedDate = new Date(date).toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
 
     return (
         <motion.div
@@ -49,14 +64,14 @@ export default function InvitationCard() {
                 </motion.div>
 
                 <motion.h1 variants={itemVariants} className="text-6xl sm:text-8xl font-playfair mb-8 text-pink-900 leading-tight">
-                    Abdelrahman <br />
+                    {groom} <br />
                     <span className="text-4xl sm:text-5xl italic block my-3 text-pink-300 font-serif">&</span>
-                    Esraa
+                    {bride}
                 </motion.h1>
 
                 <motion.div variants={itemVariants} className="mb-10">
-                    <p className="font-cairo text-xl sm:text-3xl text-pink-700/90 leading-relaxed dir-rtl mb-6">
-                        يسرّنا دعوتكم لحضور حفلنا، وتشريفنا بوجودكم لإكمال فرحتنا
+                    <p className="font-cairo text-xl sm:text-3xl text-pink-700/90 leading-relaxed dir-rtl mb-6 whitespace-pre-line">
+                        {message}
                     </p>
                     <div className="flex items-center justify-center gap-4">
                         <div className="h-px w-8 bg-pink-200"></div>
@@ -70,33 +85,33 @@ export default function InvitationCard() {
                         The joy of our wedding is incomplete <br className="hidden sm:block" /> without your presence.
                     </p>
                     <p className="font-playfair text-3xl font-bold text-pink-900 tracking-wider pt-4">
-                        Wednesday, 12 August 2026
+                        {formattedDate}
                     </p>
                 </motion.div>
 
                 <motion.div variants={itemVariants}>
-                    <Countdown />
+                    <Countdown date={date} />
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="mt-14 relative group">
                     <div className="absolute -inset-4 bg-pink-50/50 rounded-[2rem] blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div className="relative bg-white/50 p-8 rounded-[2rem] border border-white/80 shadow-sm overflow-hidden">
                         <h2 className="font-playfair font-bold text-2xl text-pink-900 mb-2 tracking-wide">
-                            Reviera Hall
+                            {location_name}
                         </h2>
-                        <p className="font-montserrat text-pink-800/60 tracking-widest text-sm mb-8">Cairo, Egypt</p>
+                        <p className="font-montserrat text-pink-800/60 tracking-widest text-sm mb-8">{location_city}</p>
 
                         <div className="relative rounded-2xl overflow-hidden shadow-md border border-white/50">
                             <iframe
-                                className="w-full h-48 filter grayscale-[0.3] contrast-[1.1] hover:grayscale-0 transition-all duration-700"
-                                src="https://maps.google.com/maps?q=cairo&output=embed"
+                                className="w-full h-48 filter grayscale-[0.3] contrast-[1.1] hover:grayscale-0 transition-all duration-700 border-none"
+                                src={`https://maps.google.com/maps?q=${encodeURIComponent(location_name + ' ' + location_city)}&output=embed`}
                             />
                         </div>
                     </div>
                 </motion.div>
 
                 <motion.div variants={itemVariants} className="mt-12">
-                    <GuestForm />
+                    <GuestForm invitationId={id} />
                 </motion.div>
             </div>
         </motion.div>

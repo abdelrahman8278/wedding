@@ -1,54 +1,59 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import FlipDigit from './FlipDigit'
 
-export default function Countdown() {
-    const target = new Date('2026-08-12').getTime()
-    const [time, setTime] = useState(target - Date.now())
-    const [mounted, setMounted] = useState(false)
+function getTimeLeft(targetDate: Date) {
+  const total = targetDate.getTime() - new Date().getTime()
 
-    useEffect(() => {
-        setMounted(true)
-        const interval = setInterval(() => {
-            setTime(target - Date.now())
-        }, 1000)
+  const days = Math.max(0, Math.floor(total / (1000 * 60 * 60 * 24)))
+  const hours = Math.max(0, Math.floor((total / (1000 * 60 * 60)) % 24))
+  const minutes = Math.max(0, Math.floor((total / 1000 / 60) % 60))
+  const seconds = Math.max(0, Math.floor((total / 1000) % 60))
 
-        return () => clearInterval(interval)
-    }, [])
+  return { days, hours, minutes, seconds }
+}
 
-    if (!mounted) return null
+export default function Countdown({ date }: { date?: string }) {
+  const targetDate = date ? new Date(date) : new Date('2026-12-31T18:00:00')
+  const [time, setTime] = useState(getTimeLeft(targetDate))
 
-    const days = Math.max(0, Math.floor(time / (1000 * 60 * 60 * 24)))
-    const hours = Math.max(0, Math.floor((time / (1000 * 60 * 60)) % 24))
-    const minutes = Math.max(0, Math.floor((time / (1000 * 60)) % 60))
-    const seconds = Math.max(0, Math.floor((time / 1000) % 60))
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTime(getTimeLeft(targetDate))
+    }, 1000)
 
-    const timeBlocks = [
-        { label: 'Days', value: days },
-        { label: 'Hours', value: hours },
-        { label: 'Mins', value: minutes },
-        { label: 'Secs', value: seconds },
-    ]
+    return () => clearInterval(timer)
+  }, [targetDate])
 
-    return (
-        <div className="flex justify-center gap-3 sm:gap-4 my-8">
-            {timeBlocks.map((block, idx) => (
-                <motion.div 
-                    key={idx} 
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: idx * 0.1, type: "spring", stiffness: 100 }}
-                    className="flex flex-col items-center"
-                >
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white/60 backdrop-blur-md border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-2xl flex items-center justify-center text-3xl sm:text-4xl font-serif text-pink-900 relative">
-                        <span className="relative z-10">{block.value.toString().padStart(2, '0')}</span>
-                    </div>
-                    <span className="mt-3 text-xs sm:text-sm font-semibold text-pink-900/70 uppercase tracking-widest">
-                        {block.label}
-                    </span>
-                </motion.div>
-            ))}
-        </div>
-    )
+  return (
+    <div className="flex flex-col items-center gap-6 text-pink-900 my-10">
+      <h2 className="text-2xl font-playfair font-bold tracking-wide">
+        باقي على يومنا الجميل 💍
+      </h2>
+
+      <div className="flex gap-4 sm:gap-6">
+        <TimeBox label="Days" value={time.days} />
+        <TimeBox label="Hours" value={time.hours} />
+        <TimeBox label="Min" value={time.minutes} />
+        <TimeBox label="Sec" value={time.seconds} />
+      </div>
+    </div>
+  )
+}
+
+function TimeBox({ label, value }: { label: string; value: number }) {
+  const digits = String(value).padStart(2, '0')
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <div className="flex gap-1">
+        <FlipDigit value={Number(digits[0])} />
+        <FlipDigit value={Number(digits[1])} />
+      </div>
+      <span className="text-[10px] sm:text-xs font-montserrat font-bold uppercase tracking-wider opacity-60">
+        {label}
+      </span>
+    </div>
+  )
 }
