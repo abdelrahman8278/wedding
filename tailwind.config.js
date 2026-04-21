@@ -5,7 +5,13 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        playfair: ['var(--font-playfair)', 'serif'],
+        montserrat: ['var(--font-montserrat)', 'sans-serif'],
+        cairo: ['var(--font-cairo)', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 }

@@ -17,7 +17,9 @@ export default function RootLayout({
 }) {
     return (
         <html lang="en" className={`${playfair.variable} ${montserrat.variable} ${cairo.variable}`}>
-            <body className="font-montserrat">{children}</body>
+            <body className="font-montserrat" suppressHydrationWarning>
+                {children}
+            </body>
         </html>
     )
 }

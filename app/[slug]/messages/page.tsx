@@ -1,28 +1,37 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '@/lib/supabase'
+import { AnimatePresence, motion } from 'framer-motion'
 import Link from 'next/link'
+import { useParams, useSearchParams } from 'next/navigation'
+import { FaArrowLeft, FaLock, FaRegEnvelope } from 'react-icons/fa6'
+import { supabase } from '@/lib/supabase'
+import { getInvitationTemplateId, getInvitationTemplateUi } from '@/lib/templates'
+import type { GuestMessage, Invitation } from '@/lib/types'
 
-export default function MessagesPage({ params }: any) {
+export default function MessagesPage() {
+    const params = useParams<{ slug: string }>()
+    const searchParams = useSearchParams()
+    const slug = params.slug
+    const template = getInvitationTemplateId(searchParams.get('template'))
+    const ui = getInvitationTemplateUi(template)
 
     const [password, setPassword] = useState('')
-    const [messages, setMessages] = useState<any[]>([])
+    const [messages, setMessages] = useState<GuestMessage[]>([])
     const [allowed, setAllowed] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(false)
 
     const checkPassword = async () => {
-        if (!password) return
+        if (!password.trim()) return
         setLoading(true)
         setError(false)
 
         const { data } = await supabase
             .from('invitations')
             .select('*')
-            .eq('slug', params.slug)
-            .single()
+            .eq('slug', slug)
+            .single<Invitation>()
 
         if (data?.access_password === password) {
             const { data: msgs } = await supabase
@@ -30,6 +39,7 @@ export default function MessagesPage({ params }: any) {
                 .select('*')
                 .eq('invitation_id', data.id)
                 .order('created_at', { ascending: false })
+                .returns<GuestMessage[]>()
 
             setMessages(msgs || [])
             setAllowed(true)
@@ -40,149 +50,155 @@ export default function MessagesPage({ params }: any) {
         setLoading(false)
     }
 
-    if (!allowed) {
-        return (
-            <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-rose-50 to-yellow-50 px-4">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="fixed top-6 left-6 z-50"
-                >
-                    <Link href={`/${params.slug}`} className="flex items-center gap-2 bg-white/80 backdrop-blur-md border border-pink-100 px-4 py-2 rounded-full shadow-sm hover:shadow-pink-200/50 transition-all duration-300 group">
-                        <span className="text-lg group-hover:-translate-x-1 transition-transform duration-300">⬅️</span>
-                        <span className="font-cairo text-sm text-pink-600">العودة للدعوة</span>
-                    </Link>
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 24 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, ease: 'easeOut' }}
-                    className="w-full max-w-sm bg-white/70 backdrop-blur-3xl border border-white/40 rounded-[2.5rem] shadow-[0_30px_60px_-10px_rgba(0,0,0,0.1)] p-10 text-center"
-                >
-                    {/* Lock Icon */}
-                    <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-pink-50 border border-pink-100 flex items-center justify-center text-3xl shadow-inner">
-                        🔒
-                    </div>
-
-                    <p className="font-montserrat uppercase tracking-[0.3em] text-pink-500 text-xs font-bold mb-2">
-                        منطقة خاصة
-                    </p>
-                    <h1 className="font-playfair text-2xl text-pink-900 font-bold mb-6">
-                        رسائل الضيوف
-                    </h1>
-
-                    <div className="space-y-3">
-                        <input
-                            dir="rtl"
-                            type="password"
-                            placeholder="كلمة المرور"
-                            value={password}
-                            onChange={(e) => { setPassword(e.target.value); setError(false) }}
-                            onKeyDown={(e) => e.key === 'Enter' && checkPassword()}
-                            className="w-full bg-white/70 border border-pink-100 rounded-2xl px-5 py-3 text-pink-900 placeholder:text-pink-300 font-cairo text-sm outline-none focus:ring-2 focus:ring-pink-200 transition"
-                        />
-
-                        <AnimatePresence>
-                            {error && (
-                                <motion.p
-                                    initial={{ opacity: 0, y: -4 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0 }}
-                                    className="text-rose-400 font-cairo text-sm"
-                                >
-                                    كلمة المرور غير صحيحة ❌
-                                </motion.p>
-                            )}
-                        </AnimatePresence>
-
-                        <motion.button
-                            onClick={checkPassword}
-                            disabled={loading || !password}
-                            whileTap={{ scale: 0.97 }}
-                            whileHover={{ scale: 1.02 }}
-                            className="w-full py-3 rounded-2xl bg-gradient-to-r from-pink-400 to-rose-400 text-white font-montserrat font-bold text-sm tracking-wider shadow-md transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? '...' : 'دخول'}
-                        </motion.button>
-                    </div>
-                </motion.div>
-            </main>
-        )
-    }
-
     return (
-        <main className="min-h-screen bg-gradient-to-br from-pink-100 via-rose-50 to-yellow-50 px-4 py-14 relative">
-            
-            {/* Back Button */}
-            <motion.div 
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="fixed top-6 left-6 z-50"
-            >
-                <Link href={`/${params.slug}`} className="flex items-center gap-2 bg-white/80 backdrop-blur-md border border-pink-100 px-4 py-2 rounded-full shadow-sm hover:shadow-pink-200/50 transition-all duration-300 group">
-                    <span className="text-lg group-hover:-translate-x-1 transition-transform duration-300">⬅️</span>
-                    <span className="font-cairo text-sm text-pink-600">العودة للدعوة</span>
-                </Link>
-            </motion.div>
+        <main className={`relative min-h-screen overflow-hidden px-4 py-24 ${ui.pageBackground}`}>
+            <BackLink slug={slug} template={template} actionButton={ui.actionButton} actionIcon={ui.actionIcon} />
 
-            <div className="max-w-2xl mx-auto">
-
-                {/* Page Header */}
-                <motion.div
-                    initial={{ opacity: 0, y: -16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-center mb-12"
-                >
-                    <p className="font-montserrat uppercase tracking-[0.4em] text-pink-500 text-xs font-bold mb-2">
-                        رسائل الضيوف
-                    </p>
-                    <h1 className="font-playfair text-4xl text-pink-900 font-bold">
-                        كلمات من القلب 💌
-                    </h1>
-                    <div className="flex items-center justify-center gap-3 mt-4">
-                        <div className="h-px w-16 bg-pink-200" />
-                        <div className="w-1.5 h-1.5 rounded-full bg-pink-300" />
-                        <div className="h-px w-16 bg-pink-200" />
-                    </div>
-                </motion.div>
-
-                {/* Messages */}
-                {messages.length === 0 ? (
+            {!allowed ? (
+                <section className="flex min-h-[calc(100vh-12rem)] items-center justify-center">
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-center text-pink-400 font-cairo text-lg py-20"
+                        initial={{ opacity: 0, y: 24 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                        className={`w-full max-w-sm rounded-[2rem] border p-7 text-center sm:p-10 ${ui.formPanel}`}
                     >
-                        لا توجد رسائل بعد 🌸
-                    </motion.div>
-                ) : (
-                    <div className="space-y-4">
-                        {messages.map((msg, i) => (
-                            <motion.div
-                                key={msg.id}
-                                initial={{ opacity: 0, y: 16 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: i * 0.08, duration: 0.4 }}
-                                className="bg-white/60 backdrop-blur-md border border-white/70 rounded-3xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.05)]"
+                        <div className={`mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border ${ui.formInput}`}>
+                            <FaLock className={`text-2xl ${ui.actionIcon}`} />
+                        </div>
+
+                        <p className={`mb-2 font-cairo text-xs font-bold ${ui.formTitle}`}>
+                            منطقة خاصة
+                        </p>
+                        <h1 className={`mb-6 font-cairo text-2xl font-bold ${ui.countdownText}`}>
+                            رسائل الضيوف
+                        </h1>
+
+                        <div className="space-y-3">
+                            <input
                                 dir="rtl"
+                                type="password"
+                                placeholder="كلمة المرور"
+                                value={password}
+                                onChange={(event) => {
+                                    setPassword(event.target.value)
+                                    setError(false)
+                                }}
+                                onKeyDown={(event) => event.key === 'Enter' && checkPassword()}
+                                className={`w-full rounded-2xl border px-5 py-3 font-cairo text-sm outline-none transition focus:ring-2 ${ui.formInput}`}
+                            />
+
+                            <AnimatePresence>
+                                {error && (
+                                    <motion.p
+                                        initial={{ opacity: 0, y: -4 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0 }}
+                                        className="font-cairo text-sm text-rose-400"
+                                    >
+                                        كلمة المرور غير صحيحة
+                                    </motion.p>
+                                )}
+                            </AnimatePresence>
+
+                            <motion.button
+                                type="button"
+                                onClick={checkPassword}
+                                disabled={loading || !password.trim()}
+                                whileTap={{ scale: 0.97 }}
+                                whileHover={{ scale: 1.01 }}
+                                className={`min-h-12 w-full rounded-2xl py-3 font-cairo text-sm font-bold transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${ui.formButton}`}
                             >
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 flex items-center justify-center text-pink-700 font-bold font-serif text-lg shadow-inner">
-                                        {msg.name?.charAt(0)}
+                                {loading ? 'جار الدخول...' : 'دخول'}
+                            </motion.button>
+                        </div>
+                    </motion.div>
+                </section>
+            ) : (
+                <section className="mx-auto max-w-2xl">
+                    <motion.div
+                        initial={{ opacity: 0, y: -16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-12 text-center"
+                    >
+                        <p className={`mb-2 font-cairo text-xs font-bold ${ui.formTitle}`}>
+                            رسائل الضيوف
+                        </p>
+                        <h1 className={`font-cairo text-4xl font-bold ${ui.countdownText}`}>
+                            كلمات من القلب
+                        </h1>
+                        <div className="mt-4 flex items-center justify-center gap-3">
+                            <div className={`h-px w-16 ${ui.formLine}`} />
+                            <div className={`h-1.5 w-1.5 rounded-full ${ui.formLine}`} />
+                            <div className={`h-px w-16 ${ui.formLine}`} />
+                        </div>
+                    </motion.div>
+
+                    {messages.length === 0 ? (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className={`py-20 text-center font-cairo text-lg ${ui.formTitle}`}
+                        >
+                            لا توجد رسائل بعد
+                        </motion.div>
+                    ) : (
+                        <div className="space-y-4">
+                            {messages.map((msg, index) => (
+                                <motion.article
+                                    key={msg.id}
+                                    initial={{ opacity: 0, y: 16 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.08, duration: 0.4 }}
+                                    className={`rounded-3xl border p-6 ${ui.formPanel}`}
+                                    dir="rtl"
+                                >
+                                    <div className="mb-3 flex items-center gap-3">
+                                        <div className={`flex h-10 w-10 items-center justify-center rounded-full border font-cairo text-lg font-bold ${ui.formInput}`}>
+                                            {msg.name?.charAt(0)}
+                                        </div>
+                                        <h3 className={`font-cairo text-sm font-bold ${ui.countdownText}`}>
+                                            {msg.name}
+                                        </h3>
                                     </div>
-                                    <h3 className="font-cairo font-bold text-pink-900 text-sm">
-                                        {msg.name}
-                                    </h3>
-                                </div>
-                                <p className="font-cairo text-pink-700/80 leading-relaxed text-sm">
-                                    {msg.message}
-                                </p>
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
-            </div>
+                                    <p className={`font-cairo text-sm leading-relaxed ${ui.countdownText}`}>
+                                        {msg.message}
+                                    </p>
+                                </motion.article>
+                            ))}
+                        </div>
+                    )}
+                </section>
+            )}
         </main>
     )
-}
+}
+
+function BackLink({
+    slug,
+    template,
+    actionButton,
+    actionIcon,
+}: {
+    slug: string
+    template: string
+    actionButton: string
+    actionIcon: string
+}) {
+    return (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="fixed left-5 top-5 z-50 sm:left-6 sm:top-6"
+        >
+            <Link
+                href={`/${slug}?template=${template}`}
+                className={`flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 transition-all duration-300 group ${actionButton}`}
+                aria-label="العودة للدعوة"
+            >
+                <FaArrowLeft className={`text-sm transition-transform duration-300 group-hover:-translate-x-1 ${actionIcon}`} />
+                <span className="font-cairo text-sm font-bold">الدعوة</span>
+                <FaRegEnvelope className={`text-sm ${actionIcon}`} />
+            </Link>
+        </motion.div>
+    )
+}

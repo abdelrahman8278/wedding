@@ -1,25 +1,47 @@
 'use client'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '@/lib/supabase'
+import { getInvitationTemplateUi } from '@/lib/templates'
+import type { InvitationTemplateId } from '@/lib/templates'
 
-export default function GuestForm({ invitationId }: any) {
+type GuestFormProps = {
+    invitationId: string
+    template: InvitationTemplateId
+}
 
+export default function GuestForm({ invitationId, template }: GuestFormProps) {
     const [name, setName] = useState('')
     const [message, setMessage] = useState('')
     const [loading, setLoading] = useState(false)
     const [sent, setSent] = useState(false)
+    const [error, setError] = useState('')
+    const ui = getInvitationTemplateUi(template)
 
     const handleSubmit = async () => {
-        if (!name.trim() || !message.trim()) return
-        setLoading(true)
+        const trimmedName = name.trim()
+        const trimmedMessage = message.trim()
 
-        await supabase.from('guest_messages').insert([
-            { invitation_id: invitationId, name, message }
+        if (!trimmedName || !trimmedMessage) {
+            setError('اكتب اسمك ورسالتك قبل الإرسال')
+            return
+        }
+
+        setLoading(true)
+        setError('')
+
+        const { error: submitError } = await supabase.from('guest_messages').insert([
+            { invitation_id: invitationId, name: trimmedName, message: trimmedMessage },
         ])
 
         setLoading(false)
+
+        if (submitError) {
+            setError('حدث خطأ أثناء الإرسال، حاول مرة أخرى')
+            return
+        }
+
         setSent(true)
         setName('')
         setMessage('')
@@ -29,53 +51,77 @@ export default function GuestForm({ invitationId }: any) {
 
     return (
         <div className="mt-10 w-full">
-            {/* Section Title */}
-            <div className="flex items-center gap-4 mb-6">
-                <div className="h-px flex-1 bg-pink-200" />
-                <p className="font-montserrat uppercase tracking-[0.3em] text-pink-500 text-xs font-bold">
+            <div className="mb-6 flex items-center gap-4">
+                <div className={`h-px flex-1 ${ui.formLine}`} />
+                <p className={`font-cairo text-xs font-bold ${ui.formTitle}`}>
                     رسالتك لنا
                 </p>
-                <div className="h-px flex-1 bg-pink-200" />
+                <div className={`h-px flex-1 ${ui.formLine}`} />
             </div>
 
-            <div className="bg-white/50 backdrop-blur-md border border-white/70 rounded-3xl p-6 shadow-[0_8px_30px_rgba(0,0,0,0.06)] space-y-4">
-                <input
-                    dir="rtl"
-                    placeholder="اسمك"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full bg-white/70 border border-pink-100 rounded-2xl px-5 py-3 text-pink-900 placeholder:text-pink-300 font-cairo text-sm outline-none focus:ring-2 focus:ring-pink-200 transition"
-                />
+            <div className={`space-y-4 rounded-3xl border p-5 sm:p-6 ${ui.formPanel}`}>
+                <label className="block">
+                    <span className="sr-only">اسمك</span>
+                    <input
+                        dir="rtl"
+                        placeholder="اسمك"
+                        value={name}
+                        onChange={(event) => {
+                            setName(event.target.value)
+                            setError('')
+                        }}
+                        className={`w-full rounded-2xl border px-5 py-3 font-cairo text-sm outline-none transition focus:ring-2 ${ui.formInput}`}
+                    />
+                </label>
 
-                <textarea
-                    dir="rtl"
-                    rows={3}
-                    placeholder="رسالتك للعروسين..."
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="w-full bg-white/70 border border-pink-100 rounded-2xl px-5 py-3 text-pink-900 placeholder:text-pink-300 font-cairo text-sm outline-none focus:ring-2 focus:ring-pink-200 transition resize-none"
-                />
+                <label className="block">
+                    <span className="sr-only">رسالتك للعروسين</span>
+                    <textarea
+                        dir="rtl"
+                        rows={4}
+                        placeholder="رسالتك للعروسين..."
+                        value={message}
+                        onChange={(event) => {
+                            setMessage(event.target.value)
+                            setError('')
+                        }}
+                        className={`w-full resize-none rounded-2xl border px-5 py-3 font-cairo text-sm outline-none transition focus:ring-2 ${ui.formInput}`}
+                    />
+                </label>
 
                 <motion.button
+                    type="button"
                     onClick={handleSubmit}
-                    disabled={loading || !name || !message}
+                    disabled={loading || !name.trim() || !message.trim()}
                     whileTap={{ scale: 0.97 }}
-                    whileHover={{ scale: 1.02 }}
-                    className="w-full py-3 rounded-2xl bg-gradient-to-r from-pink-400 to-rose-400 text-white font-montserrat font-bold text-sm tracking-wider shadow-md hover:shadow-pink-200 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    whileHover={{ scale: 1.01 }}
+                    className={`min-h-12 w-full rounded-2xl py-3 font-cairo text-sm font-bold transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50 ${ui.formButton}`}
                 >
-                    {loading ? '...' : 'إرسال ❤️'}
+                    {loading ? 'جار الإرسال...' : 'إرسال الرسالة'}
                 </motion.button>
 
-                {/* Success Toast */}
-                <AnimatePresence>
-                    {sent && (
+                <AnimatePresence mode="wait">
+                    {error && (
                         <motion.div
+                            key="error"
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -8 }}
-                            className="text-center text-pink-600 font-cairo text-sm pt-1"
+                            className="pt-1 text-center font-cairo text-sm text-rose-400"
                         >
-                            تم إرسال رسالتك بنجاح 🌸
+                            {error}
+                        </motion.div>
+                    )}
+
+                    {sent && (
+                        <motion.div
+                            key="success"
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -8 }}
+                            className={`pt-1 text-center font-cairo text-sm ${ui.formSuccess}`}
+                        >
+                            تم إرسال رسالتك بنجاح
                         </motion.div>
                     )}
                 </AnimatePresence>

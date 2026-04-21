@@ -2,9 +2,249 @@
 
 import { motion } from 'framer-motion'
 import { useState } from 'react'
+import type { InvitationTemplateId } from '@/lib/templates'
+import type { ReactNode } from 'react'
 
-export default function Envelope({ onOpen }: { onOpen: () => void }) {
+type EnvelopeProps = {
+    onOpen: () => void
+    template: InvitationTemplateId
+    groom: string
+    bride: string
+}
+
+type EnvelopeStyle = {
+    back: string
+    side: string
+    bottom: string
+    top: string
+    card: string
+    names: string
+    line: string
+    seal: string
+    sealInner: string
+    sealText: string
+    hint: string
+    decor?: ReactNode
+}
+
+const envelopeStyles: Record<InvitationTemplateId, EnvelopeStyle> = {
+    'glassmorphism-luxury': {
+        back: 'bg-[#f4e2ff]/48 border-white/60 backdrop-blur-xl shadow-[0_30px_90px_rgba(118,75,162,0.24)]',
+        side: 'bg-[#d9b4e3]/82',
+        bottom: 'bg-[#f6d7ea]/70 border-[#b98ccf]/55',
+        top: 'bg-[linear-gradient(135deg,#e0bbe4,#d291bc,#957dad)] border-white/65',
+        card: 'bg-white/60 border-white/75',
+        names: 'text-[#3b255c]',
+        line: 'bg-[#764ba2]',
+        seal: 'bg-[#764ba2] border-[#e0bbe4]',
+        sealInner: 'bg-[#d291bc]',
+        sealText: 'text-white',
+        hint: 'text-[#3b255c]/75',
+    },
+    'neumorphism-soft': {
+        back: 'bg-[#ede4db] border-[#f8f1ea] shadow-[12px_12px_28px_#d1c7bb,-12px_-12px_28px_#ffffff]',
+        side: 'bg-[#E8D5C4]',
+        bottom: 'bg-[#ede4db] border-[#d1c7bb]',
+        top: 'bg-[linear-gradient(135deg,#E8D5C4,#C9B8A8)] border-white/70',
+        card: 'bg-[#ede4db] border-[#f8f1ea] shadow-[inset_8px_8px_18px_#d1c7bb,inset_-8px_-8px_18px_#ffffff]',
+        names: 'text-[#8f7763]',
+        line: 'bg-[#C9B8A8]',
+        seal: 'bg-[#C9B8A8] border-white',
+        sealInner: 'bg-[#E8D5C4]',
+        sealText: 'text-[#6f5b4b]',
+        hint: 'text-[#8f7763]',
+    },
+    'gradient-wave-modern': {
+        back: 'bg-white/10 border-[#D4AF37]/50 backdrop-blur-lg shadow-[0_35px_100px_rgba(51,8,103,0.3)]',
+        side: 'bg-white/20',
+        bottom: 'bg-white/20 border-[#D4AF37]/45',
+        top: 'bg-[linear-gradient(135deg,#FA709A,#FEE140,#30CFD0)] border-[#D4AF37]/70',
+        card: 'bg-white/15 border-[#D4AF37]/60 backdrop-blur-xl',
+        names: 'text-white',
+        line: 'bg-[#D4AF37]',
+        seal: 'bg-[#D4AF37] border-white/80',
+        sealInner: 'bg-[#330867]',
+        sealText: 'text-white',
+        hint: 'text-white/85',
+    },
+    'dark-elegant-premium': {
+        back: 'bg-[#1a1a1a] border-[#FFD700]/45 shadow-[0_35px_95px_rgba(255,215,0,0.16)]',
+        side: 'bg-[#2d2d2d]',
+        bottom: 'bg-[#1f1f1f] border-[#FFD700]/35',
+        top: 'bg-[linear-gradient(135deg,#2d2d2d,#1a1a1a)] border-[#FFD700]/60',
+        card: 'bg-[#2d2d2d] border-[#FFD700]/45',
+        names: 'text-[#FFD700]',
+        line: 'bg-[#FFD700]',
+        seal: 'bg-[#FFD700] border-[#fff5a8]',
+        sealInner: 'bg-[#1a1a1a]',
+        sealText: 'text-[#FFD700]',
+        hint: 'text-[#FFD700]/80',
+        decor: <div className="absolute inset-0 opacity-50 [background-image:radial-gradient(#FFD700_1px,transparent_1px)] [background-size:38px_38px]" />,
+    },
+    'floral-watercolor': {
+        back: 'bg-[#FFFEF9] border-[#FFE5E5] shadow-[0_32px_80px_rgba(186,144,198,0.18)]',
+        side: 'bg-[#FFE5E5]',
+        bottom: 'bg-[#FFFEF9] border-[#E8A0BF]/40',
+        top: 'bg-[linear-gradient(135deg,#FFE5E5,#C8E7ED,#B4E7CE)] border-white/70',
+        card: 'bg-white/85 border-[#E8A0BF]/35',
+        names: 'text-[#BA90C6]',
+        line: 'bg-[#B4E7CE]',
+        seal: 'bg-[#E8A0BF] border-[#FFE5E5]',
+        sealInner: 'bg-[#BA90C6]',
+        sealText: 'text-white',
+        hint: 'text-[#BA90C6]',
+        decor: <div className="absolute -left-6 -top-6 text-6xl text-[#E8A0BF]/45">✿</div>,
+    },
+    'botanical-watercolor': {
+        back: 'bg-[#fffaf0]/92 border-[#d8c79d]/65 shadow-[0_30px_82px_rgba(82,106,78,0.16)]',
+        side: 'bg-[#dbe7d4]',
+        bottom: 'bg-[#fffaf0] border-[#d8c79d]/55',
+        top: 'bg-[linear-gradient(135deg,#fffaf0,#e7eddc,#f1cbd3)] border-[#d8c79d]/55',
+        card: 'bg-[#fffaf0]/90 border-[#d8c79d]/50',
+        names: 'text-[#526a4e]',
+        line: 'bg-[#b79552]',
+        seal: 'bg-[#526a4e] border-[#d8c79d]',
+        sealInner: 'bg-[#b79552]',
+        sealText: 'text-[#fffaf0]',
+        hint: 'text-[#42563f]',
+        decor: (
+            <>
+                <div className="absolute left-5 top-5 h-16 w-px -rotate-[36deg] bg-[#6f8a67]/55" />
+                <div className="absolute left-7 top-7 h-6 w-3 -rotate-[60deg] rounded-[100%_0] bg-[#6f8a67]/55" />
+                <div className="absolute right-5 bottom-5 h-16 w-px rotate-[42deg] bg-[#6f8a67]/45" />
+                <div className="absolute right-8 bottom-8 h-6 w-3 rotate-[18deg] rounded-[100%_0] bg-[#6f8a67]/45" />
+            </>
+        ),
+    },
+    'pink-photo-floral': {
+        back: 'bg-white/86 border-[#f0c6d0]/70 shadow-[0_30px_82px_rgba(174,111,130,0.16)]',
+        side: 'bg-[#f8d8df]',
+        bottom: 'bg-white/92 border-[#f0c6d0]/65',
+        top: 'bg-[linear-gradient(135deg,#ffffff,#f4becb,#d7ddd9)] border-[#f0c6d0]/65',
+        card: 'bg-white/86 border-[#f0c6d0]/60',
+        names: 'text-[#9b6270]',
+        line: 'bg-[#b97788]',
+        seal: 'bg-[#b97788] border-[#f0c6d0]',
+        sealInner: 'bg-[#f4becb]',
+        sealText: 'text-white',
+        hint: 'text-[#7b4b58]',
+        decor: (
+            <>
+                <div className="absolute -left-5 -top-5 h-20 w-20 rounded-full bg-[#f4becb]/60" />
+                <div className="absolute right-4 bottom-4 h-16 w-px rotate-[45deg] bg-[#8fa7a2]/45" />
+                <div className="absolute right-8 bottom-8 h-7 w-4 rotate-[35deg] rounded-[100%_0] bg-[#8fa7a2]/45" />
+            </>
+        ),
+    },
+    'burgundy-gold-floral': {
+        back: 'bg-[#fffaf4]/92 border-[#d1ad55]/70 shadow-[0_30px_82px_rgba(91,33,48,0.16)]',
+        side: 'bg-[#f1e1d7]',
+        bottom: 'bg-[#fffaf4] border-[#d1ad55]/60',
+        top: 'bg-[linear-gradient(135deg,#fffaf4,#d1ad55,#6a1932)] border-[#d1ad55]/70',
+        card: 'bg-[#fffaf4]/90 border-[#d1ad55]/55',
+        names: 'text-[#6a1932]',
+        line: 'bg-[#d1ad55]',
+        seal: 'bg-[#6a1932] border-[#d1ad55]',
+        sealInner: 'bg-[#d1ad55]',
+        sealText: 'text-[#fff7e8]',
+        hint: 'text-[#5b2130]',
+        decor: (
+            <>
+                <div className="absolute -right-5 -top-5 h-20 w-20 rounded-full bg-[#6a1932]/75" />
+                <div className="absolute -left-4 bottom-0 h-20 w-20 rounded-full bg-[#d8a0ac]/65" />
+                <div className="absolute left-5 top-5 h-16 w-px rotate-[38deg] bg-[#d1ad55]/60" />
+            </>
+        ),
+    },
+    'sage-save-date': {
+        back: 'bg-white/92 border-[#c8d4bf]/75 shadow-[0_30px_82px_rgba(78,101,72,0.14)]',
+        side: 'bg-[#e2ebdd]',
+        bottom: 'bg-white border-[#c8d4bf]/70',
+        top: 'bg-[linear-gradient(135deg,#ffffff,#eef4ea,#aac297)] border-[#c8d4bf]/75',
+        card: 'bg-white/90 border-[#c8d4bf]/65',
+        names: 'text-[#4e6548]',
+        line: 'bg-[#8b6d3b]',
+        seal: 'bg-[#4e6548] border-[#c8d4bf]',
+        sealInner: 'bg-[#8b6d3b]',
+        sealText: 'text-white',
+        hint: 'text-[#4e6548]',
+        decor: (
+            <>
+                <div className="absolute left-10 top-6 h-14 w-28 rounded-[50%] border border-[#8b6d3b]/55" />
+                <div className="absolute right-10 top-6 h-14 w-28 rounded-[50%] border border-[#8b6d3b]/55" />
+                <div className="absolute left-6 bottom-6 h-16 w-px -rotate-[50deg] bg-[#78a46f]/45" />
+                <div className="absolute right-6 bottom-6 h-16 w-px rotate-[50deg] bg-[#78a46f]/45" />
+            </>
+        ),
+    },
+    'arabic-blush-story': {
+        back: 'bg-white/92 border-[#ead3d6]/80 shadow-[0_30px_82px_rgba(120,95,95,0.13)]',
+        side: 'bg-[#fff1f2]',
+        bottom: 'bg-white border-[#ead3d6]/75',
+        top: 'bg-[linear-gradient(135deg,#ffffff,#fff1f2,#dce9e5)] border-[#ead3d6]/80',
+        card: 'bg-white/90 border-[#ead3d6]/70',
+        names: 'text-[#5c5955]',
+        line: 'bg-[#d69aa4]',
+        seal: 'bg-[#6c6862] border-[#ead3d6]',
+        sealInner: 'bg-[#d69aa4]',
+        sealText: 'text-white',
+        hint: 'text-[#5c5955]',
+        decor: (
+            <>
+                <div className="absolute inset-x-0 top-0 h-12 bg-[#fff1f2]" />
+                <div className="absolute inset-x-0 bottom-0 h-12 bg-[#dce9e5]/65" />
+                <div className="absolute left-8 top-4 h-14 w-px -rotate-[58deg] bg-[#8ba9a0]/45" />
+                <div className="absolute right-8 top-4 h-14 w-px rotate-[58deg] bg-[#8ba9a0]/45" />
+            </>
+        ),
+    },
+    'geometric-modern': {
+        back: 'bg-[#1A535C] border-[#FFE66D] shadow-[0_35px_80px_rgba(26,83,92,0.28)]',
+        side: 'bg-[#4ECDC4]',
+        bottom: 'bg-[#FF6B6B] border-[#FFE66D]',
+        top: 'bg-[linear-gradient(135deg,#FF6B6B,#FFE66D,#4ECDC4)] border-white/60',
+        card: 'bg-[#f8fbfa] border-[#1A535C]',
+        names: 'text-[#1A535C]',
+        line: 'bg-[#FF6B6B]',
+        seal: 'bg-[#FFE66D] border-[#1A535C]',
+        sealInner: 'bg-[#FF6B6B]',
+        sealText: 'text-[#1A535C]',
+        hint: 'text-[#1A535C]',
+        decor: <div className="absolute right-6 top-6 h-14 w-14 rotate-45 bg-[#FFE66D]" />,
+    },
+    'animated-particle': {
+        back: 'bg-white/80 border-white/80 shadow-[0_35px_95px_rgba(102,126,234,0.28)]',
+        side: 'bg-[#FF6B9D]/80',
+        bottom: 'bg-white/90 border-[#FFA07A]/50',
+        top: 'bg-[linear-gradient(135deg,#FF6B9D,#FFA07A,#FFD93D)] border-white/70',
+        card: 'bg-white/95 border-white',
+        names: 'text-[#C44569]',
+        line: 'bg-[#FFD93D]',
+        seal: 'bg-[#C44569] border-[#FFD93D]',
+        sealInner: 'bg-[#FF6B9D]',
+        sealText: 'text-white',
+        hint: 'text-white/85',
+        decor: <div className="absolute inset-0 animate-[floatParticles_9s_linear_infinite] opacity-45 [background-image:radial-gradient(#FFD93D_2px,transparent_2px),radial-gradient(#FF6B9D_2px,transparent_2px)] [background-position:0_0,22px_28px] [background-size:48px_48px]" />,
+    },
+    'minimalist-japanese': {
+        back: 'bg-white border-black shadow-[0_24px_70px_rgba(0,0,0,0.12)]',
+        side: 'bg-white',
+        bottom: 'bg-white border-[#E0E0E0]',
+        top: 'bg-white border-black',
+        card: 'bg-white border-[#E0E0E0]',
+        names: 'text-black',
+        line: 'bg-[#C9A96E]',
+        seal: 'bg-white border-black',
+        sealInner: 'bg-[#C9A96E]',
+        sealText: 'text-black',
+        hint: 'text-black/65',
+    },
+}
+
+export default function Envelope({ onOpen, template, groom, bride }: EnvelopeProps) {
     const [isOpened, setIsOpened] = useState(false)
+    const style = envelopeStyles[template]
+    const initials = `${groom?.charAt(0) ?? ''} & ${bride?.charAt(0) ?? ''}`.toUpperCase()
 
     const handleClick = () => {
         if (isOpened) return
@@ -15,75 +255,70 @@ export default function Envelope({ onOpen }: { onOpen: () => void }) {
     }
 
     return (
-        <motion.div 
-            className="relative w-[320px] sm:w-[440px] h-[220px] sm:h-[280px] cursor-pointer"
+        <motion.button
+            type="button"
+            className="relative h-[220px] w-[320px] cursor-pointer text-left outline-none focus-visible:ring-4 focus-visible:ring-white/55 sm:h-[280px] sm:w-[440px]"
             onClick={handleClick}
-            exit={{ 
-                opacity: 0, 
-                scale: 1.1, 
+            exit={{
+                opacity: 0,
+                scale: 1.1,
                 rotateX: 20,
                 y: -100,
-                transition: { duration: 1, ease: [0.43, 0.13, 0.23, 0.96] } 
+                transition: { duration: 1, ease: [0.43, 0.13, 0.23, 0.96] },
             }}
             style={{ perspective: 2000 }}
+            aria-label="افتح الدعوة"
         >
-            {/* Real 3D Shadow */}
-            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[90%] h-10 bg-black/10 blur-2xl rounded-full scale-y-50"></div>
+            <div className="absolute -bottom-10 left-1/2 h-10 w-[90%] -translate-x-1/2 scale-y-50 rounded-full bg-black/15 blur-2xl" />
 
-            {/* Envelope Back */}
-            <div className="absolute inset-0 bg-pink-100/90 rounded-2xl shadow-2xl border border-white/30" />
+            <div className={`absolute inset-0 rounded-2xl border ${style.back}`} />
+            {style.decor}
 
-            {/* Inner card preview - Animated */}
-            <motion.div 
+            <motion.div
                 layoutId="invitation-card"
                 initial={{ y: 0 }}
                 animate={isOpened ? { y: -180, zIndex: 25, scale: 0.8 } : { y: 0 }}
-                transition={{ duration: 2.2, delay: 0.6, type: "tween", ease: "easeInOut" }}
-                className="absolute inset-[10px] sm:inset-[15px] bg-white rounded-xl shadow-inner flex flex-col items-center justify-center overflow-hidden z-[5] border border-pink-50"
+                transition={{ duration: 2.2, delay: 0.6, type: 'tween', ease: 'easeInOut' }}
+                className={`absolute inset-[10px] z-[5] flex flex-col items-center justify-center overflow-hidden rounded-xl border shadow-inner sm:inset-[15px] ${style.card}`}
             >
-                <div className="text-pink-400 text-3xl sm:text-4xl font-playfair opacity-40">A & E</div>
-                <div className="w-12 h-0.5 bg-pink-100 rounded-full mt-2"></div>
+                <div className={`font-playfair text-3xl opacity-75 sm:text-4xl ${style.names}`}>{initials}</div>
+                <div className={`mt-2 h-0.5 w-12 rounded-full ${style.line}`} />
             </motion.div>
 
-            {/* Flaps with Gold Accents */}
-            <div className="absolute inset-0 bg-pink-200/95 rounded-2xl z-10 pointer-events-none" style={{ clipPath: 'polygon(0 0, 50% 50%, 0 100%)' }} />
-            <div className="absolute inset-0 bg-pink-200/95 rounded-2xl z-10 pointer-events-none" style={{ clipPath: 'polygon(100% 0, 50% 50%, 100% 100%)' }} />
+            <div className={`pointer-events-none absolute inset-0 z-10 rounded-2xl ${style.side}`} style={{ clipPath: 'polygon(0 0, 50% 50%, 0 100%)' }} />
+            <div className={`pointer-events-none absolute inset-0 z-10 rounded-2xl ${style.side}`} style={{ clipPath: 'polygon(100% 0, 50% 50%, 100% 100%)' }} />
 
-            {/* Bottom Flap */}
-            <div className="absolute inset-0 bg-pink-50 rounded-2xl z-20 pointer-events-none shadow-[0_-5px_15px_rgba(0,0,0,0.03)] border-b border-pink-100" style={{ clipPath: 'polygon(0 100%, 50% 55%, 100% 100%)' }} />
+            <div className={`pointer-events-none absolute inset-0 z-20 rounded-2xl border-b shadow-[0_-5px_15px_rgba(0,0,0,0.03)] ${style.bottom}`} style={{ clipPath: 'polygon(0 100%, 50% 55%, 100% 100%)' }} />
 
-            {/* Top Flap (Animated) */}
             <motion.div
-                className="absolute inset-0 bg-gradient-to-b from-pink-300 to-pink-400 rounded-2xl z-30 origin-top shadow-xl border-t border-white/20"
+                className={`absolute inset-0 z-30 origin-top rounded-2xl border-t shadow-xl ${style.top}`}
                 style={{ clipPath: 'polygon(0 0, 100% 0, 50% 55%)' }}
                 initial={{ rotateX: 0 }}
                 animate={isOpened ? { rotateX: 160, zIndex: 0 } : { rotateX: 0 }}
-                transition={{ duration: 0.8, ease: "easeInOut" }}
+                transition={{ duration: 0.8, ease: 'easeInOut' }}
             />
 
-            {/* Wax Seal */}
-            <motion.div 
+            <motion.div
                 initial={{ scale: 1 }}
                 animate={isOpened ? { scale: 0.2, opacity: 0, y: 20 } : { scale: 1, opacity: 1 }}
                 transition={{ duration: 0.4 }}
-                className="absolute z-40 w-16 h-16 sm:w-20 sm:h-20 left-1/2 top-[55%] -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+                className="absolute left-1/2 top-[55%] z-40 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center sm:h-20 sm:w-20"
             >
-                {/* Seal Base */}
-                <div className="absolute inset-0 bg-red-700 rounded-full shadow-lg border-2 border-red-900 rotate-12"></div>
-                <div className="absolute inset-1 bg-red-600 rounded-full border border-red-800/50"></div>
-                
-                <span className="relative z-10 text-pink-100 text-[10px] sm:text-[11px] font-cairo font-bold tracking-tight text-center leading-tight drop-shadow-md">
-                    افتح<br/>الدعوة
+                <div className={`absolute inset-0 rotate-12 rounded-full border-2 shadow-lg ${style.seal}`} />
+                <div className={`absolute inset-1 rounded-full border border-white/35 ${style.sealInner}`} />
+
+                <span className={`relative z-10 text-center font-cairo text-[10px] font-bold leading-tight tracking-tight drop-shadow-md sm:text-[11px] ${style.sealText}`}>
+                    افتح<br />الدعوة
                 </span>
             </motion.div>
-            <motion.div 
+            <motion.div
                 animate={isOpened ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
                 className="absolute -bottom-16 left-0 w-full text-center"
             >
-                <span className="text-pink-700/60 font-montserrat uppercase tracking-[0.3em] text-[10px] sm:text-xs">
-                    Press to Reveal
+                <span className={`font-cairo text-xs font-bold tracking-wide sm:text-sm ${style.hint}`}>
+                    اضغط لفتح الدعوة
                 </span>
             </motion.div>
-        </motion.div>
+        </motion.button>
     )
 }

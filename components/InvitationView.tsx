@@ -1,33 +1,52 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
+import { FaRegEnvelope } from 'react-icons/fa6'
 import Envelope from './Envelope'
 import InvitationCard from './InvitationCard'
+import TemplateSwitcher from './TemplateSwitcher'
+import type { Invitation } from '@/lib/types'
+import { getInvitationTemplateId, getInvitationTemplateUi } from '@/lib/templates'
 
-import Link from 'next/link'
+type InvitationViewProps = {
+    data: Invitation
+    templateOverride?: string
+}
 
-export default function InvitationView({ data }: any) {
-
+export default function InvitationView({ data, templateOverride }: InvitationViewProps) {
     const [open, setOpen] = useState(false)
     const audioRef = useRef<HTMLAudioElement | null>(null)
+    const searchParams = useSearchParams()
+    const templateFromUrl = searchParams.get('template')
+    const template = getInvitationTemplateId(templateFromUrl ?? templateOverride ?? data.template ?? data.template_id)
+    const ui = getInvitationTemplateUi(template)
 
     const handleOpen = () => {
         setOpen(true)
-        audioRef.current?.play().catch(() => { })
+        audioRef.current?.play().catch(() => {})
     }
 
     return (
-        <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-100 via-rose-50 to-yellow-50 relative">
+        <main className={`min-h-screen flex items-center justify-center relative overflow-hidden px-3 pt-28 pb-28 sm:pb-12 ${ui.pageBackground}`}>
+            <TemplateSwitcher activeTemplate={template} />
 
             <audio ref={audioRef} loop src="/music.mp3" />
 
             <AnimatePresence mode="wait">
                 {!open ? (
-                    <Envelope key="env" onOpen={handleOpen} />
+                    <Envelope
+                        key={`env-${template}`}
+                        onOpen={handleOpen}
+                        template={template}
+                        groom={data.groom}
+                        bride={data.bride}
+                    />
                 ) : (
                     <InvitationCard
-                        key="card"
+                        key={`card-${template}`}
                         id={data.id}
                         groom={data.groom}
                         bride={data.bride}
@@ -35,22 +54,25 @@ export default function InvitationView({ data }: any) {
                         date={data.wedding_date}
                         location_name={data.location_name}
                         location_city={data.location_city}
+                        template={template}
                     />
                 )}
             </AnimatePresence>
 
-            {/* Floating button for messages */}
-            <motion.div 
+            <motion.div
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="fixed bottom-6 right-6 z-[60]"
+                className="fixed bottom-5 right-5 z-[60] sm:bottom-6 sm:right-6"
             >
-                <Link href={`/${data.slug}/messages`} className="flex items-center gap-2 bg-white/80 backdrop-blur-md border border-pink-200 px-5 py-3 rounded-full shadow-lg hover:shadow-pink-200/50 transition-all duration-300 group">
-                    <span className="text-xl group-hover:scale-125 transition-transform duration-300">💌</span>
-                    <span className="font-cairo text-sm font-bold text-pink-600">رسائل الضيوف</span>
+                <Link
+                    href={`/${data.slug}/messages?template=${template}`}
+                    className={`flex min-h-12 items-center gap-2 rounded-full border px-4 py-3 transition-all duration-300 group sm:px-5 ${ui.actionButton}`}
+                    aria-label="رسائل الضيوف"
+                >
+                    <FaRegEnvelope className={`text-lg transition-transform duration-300 group-hover:scale-110 ${ui.actionIcon}`} />
+                    <span className="font-cairo text-sm font-bold">رسائل الضيوف</span>
                 </Link>
             </motion.div>
-
         </main>
     )
 }
