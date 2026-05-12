@@ -41,7 +41,7 @@ export default function InvitationView({ data, templateOverride }: InvitationVie
 
     return (
         <main
-            className={`min-h-screen flex items-center justify-center relative overflow-hidden px-3 pt-28 pb-28 sm:pb-12 ${ui.pageBackground}`}
+            className={`min-h-screen flex items-center justify-center relative overflow-hidden px-3 pt-16 pb-28 sm:pb-12 lg:pt-28 ${ui.pageBackground}`}
             data-invitation-mode={mode}
             style={themeVars}
         >
