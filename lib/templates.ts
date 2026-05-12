@@ -83,6 +83,47 @@ export type InvitationTemplateId = (typeof invitationTemplates)[number]['id']
 
 export const defaultInvitationTemplate: InvitationTemplateId = 'glassmorphism-luxury'
 
+export type InvitationThemeMode = 'dark' | 'light'
+
+export const defaultInvitationThemeMode: InvitationThemeMode = 'dark'
+
+export type InvitationThemeVars = Record<`--invite-${string}`, string>
+
+export const invitationThemeVars: Record<InvitationThemeMode, InvitationThemeVars> = {
+    dark: {
+        '--invite-bg': '#080808',
+        '--invite-bg-soft': '#12100c',
+        '--invite-surface': '#1a1a1a',
+        '--invite-surface-soft': '#2d2d2d',
+        '--invite-text': '#f8f3df',
+        '--invite-text-muted': '#e8dfc0',
+        '--invite-accent': '#FFD700',
+        '--invite-accent-soft': '#fff5a8',
+        '--invite-border': 'rgba(255,215,0,0.35)',
+        '--invite-shadow': 'rgba(255,215,0,0.14)',
+    },
+    light: {
+        '--invite-bg': '#fffaf0',
+        '--invite-bg-soft': '#f6ecd8',
+        '--invite-surface': '#ffffff',
+        '--invite-surface-soft': '#f8efe0',
+        '--invite-text': '#382d22',
+        '--invite-text-muted': '#6e5d49',
+        '--invite-accent': '#b79552',
+        '--invite-accent-soft': '#e6d5ad',
+        '--invite-border': 'rgba(183,149,82,0.42)',
+        '--invite-shadow': 'rgba(110,82,36,0.16)',
+    },
+}
+
+export function getInvitationThemeMode(mode?: string | null): InvitationThemeMode {
+    return mode?.trim().toLowerCase() === 'light' ? 'light' : defaultInvitationThemeMode
+}
+
+export function getInvitationThemeVars(mode: InvitationThemeMode): InvitationThemeVars {
+    return invitationThemeVars[mode]
+}
+
 export type InvitationTemplateUi = {
     pageBackground: string
     switcher: string
@@ -116,13 +157,13 @@ export const invitationTemplateUi: Record<InvitationTemplateId, InvitationTempla
         formTitle: 'text-[#4b2f73]',
         formPanel: 'bg-[#f4e2ff]/42 border-white/60 backdrop-blur-xl shadow-[0_18px_45px_rgba(118,75,162,0.18)]',
         formInput: 'bg-white/48 border-white/65 text-[#3b255c] placeholder:text-[#674c77]/60 focus:ring-[#9b4f8f]/50',
-        formButton: 'bg-[linear-gradient(135deg,#764ba2,#d291bc)] text-white shadow-[0_14px_35px_rgba(118,75,162,0.22)]',
+        formButton: 'bg-[linear-gradient(135deg,#764ba2,#9b4f8f)] text-white shadow-[0_14px_35px_rgba(118,75,162,0.22)]',
         formSuccess: 'text-[#4b2f73]',
     },
     'neumorphism-soft': {
         pageBackground: 'bg-[#ede4db]',
         switcher: 'border-[#f8f1ea] bg-[#ede4db] text-[#6f5b4b] shadow-[8px_8px_22px_#d1c7bb,-8px_-8px_22px_#ffffff]',
-        switcherActive: 'bg-[#C9B8A8] text-white shadow-[inset_3px_3px_8px_#ad9f91,inset_-3px_-3px_8px_#ead8c7]',
+        switcherActive: 'bg-[#C9B8A8] text-[#5d493b] shadow-[inset_3px_3px_8px_#ad9f91,inset_-3px_-3px_8px_#ead8c7]',
         switcherIdle: 'bg-[#ede4db] text-[#7b6654] hover:bg-[#f3ebe3]',
         actionButton: 'bg-[#ede4db] border-[#f8f1ea] text-[#6f5b4b] shadow-[8px_8px_18px_#d1c7bb,-8px_-8px_18px_#ffffff] hover:bg-[#f3ebe3]',
         actionIcon: 'text-[#8f7763]',
@@ -133,58 +174,58 @@ export const invitationTemplateUi: Record<InvitationTemplateId, InvitationTempla
         formTitle: 'text-[#8f7763]',
         formPanel: 'bg-[#ede4db] border-[#f8f1ea] shadow-[10px_10px_24px_#d1c7bb,-10px_-10px_24px_#ffffff]',
         formInput: 'bg-[#ede4db] border-[#f8f1ea] text-[#6f5b4b] placeholder:text-[#9b806b]/60 focus:ring-[#C9B8A8]',
-        formButton: 'bg-[#C9B8A8] text-white shadow-[8px_8px_18px_#d1c7bb,-8px_-8px_18px_#ffffff]',
+        formButton: 'bg-[#C9B8A8] text-[#5d493b] shadow-[8px_8px_18px_#d1c7bb,-8px_-8px_18px_#ffffff]',
         formSuccess: 'text-[#8f7763]',
     },
     'gradient-wave-modern': {
         pageBackground: 'bg-[linear-gradient(135deg,#FA709A_0%,#FEE140_38%,#30CFD0_70%,#330867_100%)] animate-[gradientShift_18s_ease_infinite] bg-[length:240%_240%]',
-        switcher: 'border-[#D4AF37]/55 bg-white/10 text-white shadow-[0_18px_50px_rgba(51,8,103,0.22)]',
+        switcher: 'border-[#D4AF37]/55 bg-[#330867]/50 text-white shadow-[0_18px_50px_rgba(51,8,103,0.22)]',
         switcherActive: 'bg-[#D4AF37] text-[#330867] shadow-md',
-        switcherIdle: 'bg-white/10 text-white hover:bg-white/20',
-        actionButton: 'bg-white/10 border-[#D4AF37]/45 text-white backdrop-blur-xl shadow-[0_18px_45px_rgba(51,8,103,0.22)] hover:bg-white/20',
+        switcherIdle: 'bg-[#330867]/35 text-white hover:bg-white/80 hover:text-[#330867]',
+        actionButton: 'bg-[#330867]/42 border-[#D4AF37]/45 text-white backdrop-blur-xl shadow-[0_18px_45px_rgba(51,8,103,0.22)] hover:bg-white/85 hover:text-[#330867]',
         actionIcon: 'text-[#FEE140]',
         countdownText: 'text-white',
-        digitBox: 'bg-white/12 border-[#D4AF37]/50 backdrop-blur-xl shadow-[0_18px_45px_rgba(51,8,103,0.22)]',
+        digitBox: 'bg-[#330867]/38 border-[#D4AF37]/50 backdrop-blur-xl shadow-[0_18px_45px_rgba(51,8,103,0.22)]',
         digitText: 'text-white',
         formLine: 'bg-[#D4AF37]/60',
         formTitle: 'text-[#FEE140]',
-        formPanel: 'bg-white/10 border-[#D4AF37]/45 backdrop-blur-xl shadow-[0_18px_45px_rgba(51,8,103,0.22)]',
-        formInput: 'bg-white/10 border-[#D4AF37]/45 text-white placeholder:text-white/45 focus:ring-[#FEE140]/60',
+        formPanel: 'bg-[#330867]/35 border-[#D4AF37]/45 backdrop-blur-xl shadow-[0_18px_45px_rgba(51,8,103,0.22)]',
+        formInput: 'bg-[#330867]/35 border-[#D4AF37]/45 text-white placeholder:text-white/55 focus:ring-[#FEE140]/60',
         formButton: 'bg-[linear-gradient(135deg,#FA709A,#FEE140)] text-[#330867] shadow-[0_14px_35px_rgba(250,112,154,0.25)]',
         formSuccess: 'text-[#FEE140]',
     },
     'dark-elegant-premium': {
-        pageBackground: 'bg-[#080808]',
-        switcher: 'border-[#FFD700]/30 bg-[#1a1a1a]/90 text-[#f8f3df] shadow-[0_18px_50px_rgba(255,215,0,0.10)]',
-        switcherActive: 'bg-[#FFD700] text-black shadow-[0_0_22px_rgba(255,215,0,0.25)]',
-        switcherIdle: 'bg-[#2d2d2d] text-[#f8f3df] hover:bg-[#383838]',
-        actionButton: 'bg-[#1a1a1a]/95 border-[#FFD700]/35 text-[#f8f3df] shadow-[0_18px_50px_rgba(255,215,0,0.12)] hover:bg-[#2d2d2d]',
-        actionIcon: 'text-[#FFD700]',
-        countdownText: 'text-[#f8f3df]',
-        digitBox: 'bg-[#2d2d2d] border-[#FFD700]/35 shadow-[0_0_24px_rgba(255,215,0,0.12)]',
-        digitText: 'text-[#FFD700]',
-        formLine: 'bg-[#FFD700]/45',
-        formTitle: 'text-[#FFD700]',
-        formPanel: 'bg-[#2d2d2d] border-[#FFD700]/30 shadow-[0_18px_45px_rgba(0,0,0,0.28)]',
-        formInput: 'bg-[#1a1a1a] border-[#FFD700]/25 text-[#f8f3df] placeholder:text-[#f8f3df]/35 focus:ring-[#FFD700]/50',
-        formButton: 'bg-[#FFD700] text-black shadow-[0_0_24px_rgba(255,215,0,0.22)]',
-        formSuccess: 'text-[#FFD700]',
+        pageBackground: 'bg-[var(--invite-bg)]',
+        switcher: 'border-[var(--invite-border)] bg-[var(--invite-surface)]/90 text-[var(--invite-text)] shadow-[0_18px_50px_var(--invite-shadow)]',
+        switcherActive: 'bg-[var(--invite-accent)] text-[var(--invite-bg)] shadow-[0_0_22px_var(--invite-shadow)]',
+        switcherIdle: 'bg-[var(--invite-surface-soft)] text-[var(--invite-text)] hover:bg-[var(--invite-bg-soft)]',
+        actionButton: 'bg-[var(--invite-surface)]/95 border-[var(--invite-border)] text-[var(--invite-text)] shadow-[0_18px_50px_var(--invite-shadow)] hover:bg-[var(--invite-surface-soft)]',
+        actionIcon: 'text-[var(--invite-accent)]',
+        countdownText: 'text-[var(--invite-text)]',
+        digitBox: 'bg-[var(--invite-surface-soft)] border-[var(--invite-border)] shadow-[0_0_24px_var(--invite-shadow)]',
+        digitText: 'text-[var(--invite-accent)]',
+        formLine: 'bg-[var(--invite-accent)]/45',
+        formTitle: 'text-[var(--invite-accent)]',
+        formPanel: 'bg-[var(--invite-surface-soft)] border-[var(--invite-border)] shadow-[0_18px_45px_rgba(0,0,0,0.20)]',
+        formInput: 'bg-[var(--invite-surface)] border-[var(--invite-border)] text-[var(--invite-text)] placeholder:text-[var(--invite-text-muted)] focus:ring-[var(--invite-accent)]/50',
+        formButton: 'bg-[var(--invite-accent)] text-[var(--invite-bg)] shadow-[0_0_24px_var(--invite-shadow)]',
+        formSuccess: 'text-[var(--invite-accent)]',
     },
     'floral-watercolor': {
         pageBackground: 'bg-[#FFFEF9]',
         switcher: 'border-[#FFE5E5] bg-white/80 text-[#7b4b52] shadow-[0_18px_50px_rgba(186,144,198,0.16)]',
-        switcherActive: 'bg-[#E8A0BF] text-white shadow-md',
+        switcherActive: 'bg-[#E8A0BF] text-[#5d3441] shadow-md',
         switcherIdle: 'bg-white/75 text-[#7b4b52] hover:bg-[#FFE5E5]',
         actionButton: 'bg-white/85 border-[#FFE5E5] text-[#7b4b52] shadow-[0_18px_45px_rgba(232,160,191,0.16)] hover:bg-[#FFE5E5]',
-        actionIcon: 'text-[#E8A0BF]',
+        actionIcon: 'text-[#a24e7a]',
         countdownText: 'text-[#7b4b52]',
         digitBox: 'bg-white/80 border-[#FFE5E5] shadow-[0_16px_38px_rgba(232,160,191,0.16)]',
-        digitText: 'text-[#BA90C6]',
+        digitText: 'text-[#8f5a9e]',
         formLine: 'bg-[#E8A0BF]/45',
-        formTitle: 'text-[#BA90C6]',
+        formTitle: 'text-[#8f5a9e]',
         formPanel: 'bg-white/80 border-[#FFE5E5] shadow-[0_18px_45px_rgba(232,160,191,0.13)]',
         formInput: 'bg-white/85 border-[#FFE5E5] text-[#7b4b52] placeholder:text-[#E8A0BF]/70 focus:ring-[#BA90C6]/40',
-        formButton: 'bg-[linear-gradient(135deg,#E8A0BF,#BA90C6)] text-white shadow-[0_14px_35px_rgba(186,144,198,0.22)]',
+        formButton: 'bg-[linear-gradient(135deg,#E8A0BF,#BA90C6)] text-[#5d3441] shadow-[0_14px_35px_rgba(186,144,198,0.22)]',
         formSuccess: 'text-[#BA90C6]',
     },
     'botanical-watercolor': {
@@ -207,10 +248,10 @@ export const invitationTemplateUi: Record<InvitationTemplateId, InvitationTempla
     'pink-photo-floral': {
         pageBackground: 'bg-[radial-gradient(circle_at_18%_8%,rgba(244,190,203,0.78)_0,transparent_28%),radial-gradient(circle_at_86%_88%,rgba(201,219,216,0.62)_0,transparent_26%),linear-gradient(135deg,#fff7f8_0%,#f9e7ec_50%,#fffaf7_100%)]',
         switcher: 'border-[#f0c6d0]/70 bg-white/75 text-[#7b4b58] shadow-[0_18px_48px_rgba(174,111,130,0.14)]',
-        switcherActive: 'bg-[#b97788] text-white shadow-md',
+        switcherActive: 'bg-[#8f4f5f] text-white shadow-md',
         switcherIdle: 'bg-white/60 text-[#7b4b58] hover:bg-[#f8e0e6]',
         actionButton: 'bg-white/78 border-[#f0c6d0]/75 text-[#7b4b58] backdrop-blur-xl shadow-[0_18px_45px_rgba(174,111,130,0.14)] hover:bg-[#fff7f8]',
-        actionIcon: 'text-[#b97788]',
+        actionIcon: 'text-[#8f4f5f]',
         countdownText: 'text-[#6f4450]',
         digitBox: 'bg-white/84 border-[#f0c6d0]/70 shadow-[0_14px_34px_rgba(174,111,130,0.12)]',
         digitText: 'text-[#7b4b58]',
@@ -218,7 +259,7 @@ export const invitationTemplateUi: Record<InvitationTemplateId, InvitationTempla
         formTitle: 'text-[#9b6270]',
         formPanel: 'bg-white/84 border-[#f0c6d0]/65 shadow-[0_18px_45px_rgba(174,111,130,0.11)]',
         formInput: 'bg-white/82 border-[#f0c6d0]/70 text-[#6f4450] placeholder:text-[#b97788]/55 focus:ring-[#d8a0ac]/45',
-        formButton: 'bg-[#b97788] text-white shadow-[0_14px_32px_rgba(174,111,130,0.20)]',
+        formButton: 'bg-[#8f4f5f] text-white shadow-[0_14px_32px_rgba(174,111,130,0.20)]',
         formSuccess: 'text-[#9b6270]',
     },
     'burgundy-gold-floral': {
@@ -286,16 +327,16 @@ export const invitationTemplateUi: Record<InvitationTemplateId, InvitationTempla
         formTitle: 'text-[#FF6B6B]',
         formPanel: 'bg-white border-2 border-[#1A535C] shadow-[8px_8px_0_#4ECDC4]',
         formInput: 'bg-white border-2 border-[#1A535C] text-[#1A535C] placeholder:text-[#1A535C]/45 focus:ring-[#FFE66D]',
-        formButton: 'bg-[#FF6B6B] text-white shadow-[5px_5px_0_#FFE66D]',
+        formButton: 'bg-[#1A535C] text-white shadow-[5px_5px_0_#FFE66D]',
         formSuccess: 'text-[#1A535C]',
     },
     'animated-particle': {
         pageBackground: 'bg-[linear-gradient(135deg,#667eea_0%,#764ba2_100%)]',
         switcher: 'border-white/65 bg-white/85 text-[#C44569] shadow-[0_18px_50px_rgba(102,126,234,0.18)]',
-        switcherActive: 'bg-[#FF6B9D] text-white shadow-md',
+        switcherActive: 'bg-[#FF6B9D] text-[#5b1234] shadow-md',
         switcherIdle: 'bg-white/75 text-[#C44569] hover:bg-white',
         actionButton: 'bg-white/90 border-white text-[#C44569] shadow-[0_18px_45px_rgba(102,126,234,0.18)] hover:bg-white',
-        actionIcon: 'text-[#FF6B9D]',
+        actionIcon: 'text-[#C44569]',
         countdownText: 'text-[#C44569]',
         digitBox: 'bg-white/90 border-[#FF6B9D]/25 shadow-[0_16px_38px_rgba(255,107,157,0.16)]',
         digitText: 'text-[#C44569]',
@@ -303,7 +344,7 @@ export const invitationTemplateUi: Record<InvitationTemplateId, InvitationTempla
         formTitle: 'text-[#C44569]',
         formPanel: 'bg-white/90 border-white shadow-[0_18px_45px_rgba(102,126,234,0.16)]',
         formInput: 'bg-white border-[#FF6B9D]/25 text-[#C44569] placeholder:text-[#FF6B9D]/55 focus:ring-[#FF6B9D]/40',
-        formButton: 'bg-[linear-gradient(135deg,#FF6B9D,#FFA07A,#FFD93D)] text-white shadow-[0_14px_35px_rgba(255,107,157,0.22)]',
+        formButton: 'bg-[linear-gradient(135deg,#FF6B9D,#FFA07A,#FFD93D)] text-[#5b1234] shadow-[0_14px_35px_rgba(255,107,157,0.22)]',
         formSuccess: 'text-[#C44569]',
     },
     'minimalist-japanese': {

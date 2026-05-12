@@ -1,7 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { useState } from 'react'
+import { motion, useAnimation } from 'framer-motion'
+import { useEffect, useState } from 'react'
 import type { InvitationTemplateId } from '@/lib/templates'
 import type { ReactNode } from 'react'
 
@@ -68,18 +68,18 @@ const envelopeStyles: Record<InvitationTemplateId, EnvelopeStyle> = {
         hint: 'text-white/85',
     },
     'dark-elegant-premium': {
-        back: 'bg-[#1a1a1a] border-[#FFD700]/45 shadow-[0_35px_95px_rgba(255,215,0,0.16)]',
-        side: 'bg-[#2d2d2d]',
-        bottom: 'bg-[#1f1f1f] border-[#FFD700]/35',
-        top: 'bg-[linear-gradient(135deg,#2d2d2d,#1a1a1a)] border-[#FFD700]/60',
-        card: 'bg-[#2d2d2d] border-[#FFD700]/45',
-        names: 'text-[#FFD700]',
-        line: 'bg-[#FFD700]',
-        seal: 'bg-[#FFD700] border-[#fff5a8]',
-        sealInner: 'bg-[#1a1a1a]',
-        sealText: 'text-[#FFD700]',
-        hint: 'text-[#FFD700]/80',
-        decor: <div className="absolute inset-0 opacity-50 [background-image:radial-gradient(#FFD700_1px,transparent_1px)] [background-size:38px_38px]" />,
+        back: 'bg-[var(--invite-surface)] border-[var(--invite-border)] shadow-[0_35px_95px_var(--invite-shadow)]',
+        side: 'bg-[var(--invite-surface-soft)]',
+        bottom: 'bg-[var(--invite-bg-soft)] border-[var(--invite-border)]',
+        top: 'bg-[linear-gradient(135deg,var(--invite-surface-soft),var(--invite-surface))] border-[var(--invite-border)]',
+        card: 'bg-[var(--invite-surface-soft)] border-[var(--invite-border)]',
+        names: 'text-[var(--invite-accent)]',
+        line: 'bg-[var(--invite-accent)]',
+        seal: 'bg-[var(--invite-accent)] border-[var(--invite-accent-soft)]',
+        sealInner: 'bg-[var(--invite-surface)]',
+        sealText: 'text-[var(--invite-accent)]',
+        hint: 'text-[var(--invite-accent)]/80',
+        decor: <div className="absolute inset-0 opacity-45 [background-image:radial-gradient(var(--invite-accent)_1px,transparent_1px)] [background-size:38px_38px]" />,
     },
     'floral-watercolor': {
         back: 'bg-[#FFFEF9] border-[#FFE5E5] shadow-[0_32px_80px_rgba(186,144,198,0.18)]',
@@ -87,12 +87,12 @@ const envelopeStyles: Record<InvitationTemplateId, EnvelopeStyle> = {
         bottom: 'bg-[#FFFEF9] border-[#E8A0BF]/40',
         top: 'bg-[linear-gradient(135deg,#FFE5E5,#C8E7ED,#B4E7CE)] border-white/70',
         card: 'bg-white/85 border-[#E8A0BF]/35',
-        names: 'text-[#BA90C6]',
+        names: 'text-[#7b4b6a]',
         line: 'bg-[#B4E7CE]',
         seal: 'bg-[#E8A0BF] border-[#FFE5E5]',
         sealInner: 'bg-[#BA90C6]',
         sealText: 'text-white',
-        hint: 'text-[#BA90C6]',
+        hint: 'text-[#7b4b6a]',
         decor: <div className="absolute -left-6 -top-6 text-6xl text-[#E8A0BF]/45">✿</div>,
     },
     'botanical-watercolor': {
@@ -243,15 +243,26 @@ const envelopeStyles: Record<InvitationTemplateId, EnvelopeStyle> = {
 
 export default function Envelope({ onOpen, template, groom, bride }: EnvelopeProps) {
     const [isOpened, setIsOpened] = useState(false)
+    const floatControls = useAnimation()
     const style = envelopeStyles[template]
     const initials = `${groom?.charAt(0) ?? ''} & ${bride?.charAt(0) ?? ''}`.toUpperCase()
 
+    useEffect(() => {
+        if (isOpened) return
+        floatControls.start({
+            y: [0, -10, 0],
+            rotate: [0, 0.4, 0, -0.4, 0],
+            transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+        })
+    }, [isOpened, floatControls])
+
     const handleClick = () => {
         if (isOpened) return
+        floatControls.stop()
         setIsOpened(true)
         setTimeout(() => {
             onOpen()
-        }, 3000)
+        }, 3200)
     }
 
     return (
@@ -259,30 +270,57 @@ export default function Envelope({ onOpen, template, groom, bride }: EnvelopePro
             type="button"
             className="relative h-[220px] w-[320px] cursor-pointer text-left outline-none focus-visible:ring-4 focus-visible:ring-white/55 sm:h-[280px] sm:w-[440px]"
             onClick={handleClick}
+            animate={floatControls}
+            initial={{ y: 30, opacity: 0, scale: 0.95 }}
+            whileInView={{ y: 0, opacity: 1, scale: 1, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }}
+            whileHover={!isOpened ? { scale: 1.025, y: -4, transition: { duration: 0.3, ease: 'easeOut' } } : {}}
+            whileTap={!isOpened ? { scale: 0.96, transition: { duration: 0.1 } } : {}}
             exit={{
                 opacity: 0,
-                scale: 1.1,
-                rotateX: 20,
-                y: -100,
-                transition: { duration: 1, ease: [0.43, 0.13, 0.23, 0.96] },
+                scale: 1.08,
+                y: -80,
+                filter: 'blur(4px)',
+                transition: { duration: 0.9, ease: [0.43, 0.13, 0.23, 0.96] },
             }}
-            style={{ perspective: 2000 }}
+            style={{ perspective: 2200, transformStyle: 'preserve-3d' }}
             aria-label="افتح الدعوة"
         >
-            <div className="absolute -bottom-10 left-1/2 h-10 w-[90%] -translate-x-1/2 scale-y-50 rounded-full bg-black/15 blur-2xl" />
+            <motion.div
+                className="absolute -bottom-10 left-1/2 h-10 w-[90%] -translate-x-1/2 scale-y-50 rounded-full bg-black/20 blur-2xl"
+                animate={isOpened ? { opacity: 0.4, scaleX: 0.7, y: 10 } : { opacity: 1, scaleX: 1, y: 0 }}
+                transition={{ duration: 1.2, ease: 'easeOut' }}
+            />
 
             <div className={`absolute inset-0 rounded-2xl border ${style.back}`} />
             {style.decor}
 
             <motion.div
                 layoutId="invitation-card"
-                initial={{ y: 0 }}
-                animate={isOpened ? { y: -180, zIndex: 25, scale: 0.8 } : { y: 0 }}
-                transition={{ duration: 2.2, delay: 0.6, type: 'tween', ease: 'easeInOut' }}
+                initial={{ y: 0, rotateZ: 0 }}
+                animate={isOpened
+                    ? { y: -210, zIndex: 25, scale: 0.88, rotateZ: -1.5, filter: 'drop-shadow(0 40px 50px rgba(0,0,0,0.22))' }
+                    : { y: 0, rotateZ: 0, filter: 'drop-shadow(0 0px 0px rgba(0,0,0,0))' }
+                }
+                transition={{
+                    y: { duration: 2.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] },
+                    scale: { duration: 2.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] },
+                    rotateZ: { duration: 2.6, delay: 0.5, ease: [0.16, 1, 0.3, 1] },
+                    filter: { duration: 1.2, delay: 1.2 },
+                }}
                 className={`absolute inset-[10px] z-[5] flex flex-col items-center justify-center overflow-hidden rounded-xl border shadow-inner sm:inset-[15px] ${style.card}`}
             >
-                <div className={`font-playfair text-3xl opacity-75 sm:text-4xl ${style.names}`}>{initials}</div>
-                <div className={`mt-2 h-0.5 w-12 rounded-full ${style.line}`} />
+                <motion.div
+                    animate={isOpened ? { scale: 1.08, opacity: 0.9 } : { scale: 1, opacity: 0.75 }}
+                    transition={{ duration: 1.5, delay: 0.8 }}
+                    className={`font-playfair text-3xl sm:text-4xl ${style.names}`}
+                >
+                    {initials}
+                </motion.div>
+                <motion.div
+                    animate={isOpened ? { width: '4rem', opacity: 1 } : { width: '3rem', opacity: 0.75 }}
+                    transition={{ duration: 1.5, delay: 0.9 }}
+                    className={`mt-2 h-0.5 rounded-full ${style.line}`}
+                />
             </motion.div>
 
             <div className={`pointer-events-none absolute inset-0 z-10 rounded-2xl ${style.side}`} style={{ clipPath: 'polygon(0 0, 50% 50%, 0 100%)' }} />
@@ -292,32 +330,49 @@ export default function Envelope({ onOpen, template, groom, bride }: EnvelopePro
 
             <motion.div
                 className={`absolute inset-0 z-30 origin-top rounded-2xl border-t shadow-xl ${style.top}`}
-                style={{ clipPath: 'polygon(0 0, 100% 0, 50% 55%)' }}
+                style={{ clipPath: 'polygon(0 0, 100% 0, 50% 55%)', transformStyle: 'preserve-3d' }}
                 initial={{ rotateX: 0 }}
-                animate={isOpened ? { rotateX: 160, zIndex: 0 } : { rotateX: 0 }}
-                transition={{ duration: 0.8, ease: 'easeInOut' }}
+                animate={isOpened ? { rotateX: 172, zIndex: 0 } : { rotateX: 0 }}
+                transition={{
+                    type: 'spring',
+                    stiffness: 70,
+                    damping: 13,
+                    delay: 0.05,
+                }}
             />
 
             <motion.div
-                initial={{ scale: 1 }}
-                animate={isOpened ? { scale: 0.2, opacity: 0, y: 20 } : { scale: 1, opacity: 1 }}
-                transition={{ duration: 0.4 }}
+                initial={{ scale: 1, rotate: 0, opacity: 1 }}
+                animate={isOpened
+                    ? { scale: 0, rotate: 180, opacity: 0 }
+                    : { scale: 1, rotate: 0, opacity: 1 }
+                }
+                transition={{ duration: 0.5, ease: [0.36, 0, 0.66, -0.56] }}
                 className="absolute left-1/2 top-[55%] z-40 flex h-16 w-16 -translate-x-1/2 -translate-y-1/2 items-center justify-center sm:h-20 sm:w-20"
             >
-                <div className={`absolute inset-0 rotate-12 rounded-full border-2 shadow-lg ${style.seal}`} />
+                <motion.div
+                    animate={!isOpened ? { rotate: [0, 8, -8, 0] } : {}}
+                    transition={{ duration: 4, repeat: Infinity, delay: 1.5 }}
+                    className={`absolute inset-0 rounded-full border-2 shadow-lg ${style.seal}`}
+                />
                 <div className={`absolute inset-1 rounded-full border border-white/35 ${style.sealInner}`} />
-
                 <span className={`relative z-10 text-center font-cairo text-[10px] font-bold leading-tight tracking-tight drop-shadow-md sm:text-[11px] ${style.sealText}`}>
                     افتح<br />الدعوة
                 </span>
             </motion.div>
             <motion.div
-                animate={isOpened ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 8 }}
+                animate={isOpened ? { opacity: 0, y: 16 } : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
                 className="absolute -bottom-16 left-0 w-full text-center"
             >
-                <span className={`font-cairo text-xs font-bold tracking-wide sm:text-sm ${style.hint}`}>
+                <motion.span
+                    animate={!isOpened ? { opacity: [1, 0.55, 1] } : {}}
+                    transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+                    className={`font-cairo text-xs font-bold tracking-wide sm:text-sm ${style.hint}`}
+                >
                     اضغط لفتح الدعوة
-                </span>
+                </motion.span>
             </motion.div>
         </motion.button>
     )

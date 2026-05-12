@@ -9,7 +9,8 @@ import Envelope from './Envelope'
 import InvitationCard from './InvitationCard'
 import TemplateSwitcher from './TemplateSwitcher'
 import type { Invitation } from '@/lib/types'
-import { getInvitationTemplateId, getInvitationTemplateUi } from '@/lib/templates'
+import { getInvitationTemplateId, getInvitationTemplateUi, getInvitationThemeMode, getInvitationThemeVars } from '@/lib/templates'
+import type { CSSProperties } from 'react'
 
 type InvitationViewProps = {
     data: Invitation
@@ -22,7 +23,16 @@ export default function InvitationView({ data, templateOverride }: InvitationVie
     const searchParams = useSearchParams()
     const templateFromUrl = searchParams.get('template')
     const template = getInvitationTemplateId(templateFromUrl ?? templateOverride ?? data.template ?? data.template_id)
+    const mode = getInvitationThemeMode(searchParams.get('mode'))
     const ui = getInvitationTemplateUi(template)
+    const themeVars = getInvitationThemeVars(mode) as CSSProperties
+
+    // Preserve open state when template changes
+    const prevTemplateRef = useRef(template)
+    if (prevTemplateRef.current !== template) {
+        prevTemplateRef.current = template
+        // open state is intentionally preserved
+    }
 
     const handleOpen = () => {
         setOpen(true)
@@ -30,15 +40,19 @@ export default function InvitationView({ data, templateOverride }: InvitationVie
     }
 
     return (
-        <main className={`min-h-screen flex items-center justify-center relative overflow-hidden px-3 pt-28 pb-28 sm:pb-12 ${ui.pageBackground}`}>
-            <TemplateSwitcher activeTemplate={template} />
+        <main
+            className={`min-h-screen flex items-center justify-center relative overflow-hidden px-3 pt-28 pb-28 sm:pb-12 ${ui.pageBackground}`}
+            data-invitation-mode={mode}
+            style={themeVars}
+        >
+            <TemplateSwitcher activeTemplate={template} activeMode={mode} />
 
             <audio ref={audioRef} loop src="/music.mp3" />
 
             <AnimatePresence mode="wait">
                 {!open ? (
                     <Envelope
-                        key={`env-${template}`}
+                        key={`env-${template}-${mode}`}
                         onOpen={handleOpen}
                         template={template}
                         groom={data.groom}
@@ -46,7 +60,7 @@ export default function InvitationView({ data, templateOverride }: InvitationVie
                     />
                 ) : (
                     <InvitationCard
-                        key={`card-${template}`}
+                        key={`card-${template}-${mode}`}
                         id={data.id}
                         groom={data.groom}
                         bride={data.bride}
@@ -65,12 +79,12 @@ export default function InvitationView({ data, templateOverride }: InvitationVie
                 className="fixed bottom-5 right-5 z-[60] sm:bottom-6 sm:right-6"
             >
                 <Link
-                    href={`/${data.slug}/messages?template=${template}`}
+                    href={`/${data.slug}/messages?template=${template}&mode=${mode}`}
                     className={`flex min-h-12 items-center gap-2 rounded-full border px-4 py-3 transition-all duration-300 group sm:px-5 ${ui.actionButton}`}
                     aria-label="رسائل الضيوف"
                 >
                     <FaRegEnvelope className={`text-lg transition-transform duration-300 group-hover:scale-110 ${ui.actionIcon}`} />
-                    <span className="font-cairo text-sm font-bold">رسائل الضيوف</span>
+                    <span className="font-cairo text-sm font-bold inherit-color">رسائل الضيوف</span>
                 </Link>
             </motion.div>
         </main>

@@ -28,22 +28,23 @@ type CardDesign = {
 }
 
 const containerVariants = {
-    hidden: { opacity: 0, scale: 0.95 },
+    hidden: { opacity: 0, scale: 0.97 },
     visible: {
         opacity: 1,
         scale: 1,
         transition: {
-            delayChildren: 0.25,
-            staggerChildren: 0.14
+            delayChildren: 0.1,
+            staggerChildren: 0.07
         }
     }
 }
 
 const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 14, opacity: 0 },
     visible: {
         y: 0,
-        opacity: 1
+        opacity: 1,
+        transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] }
     }
 }
 
@@ -72,7 +73,7 @@ const cardDesigns: Record<InvitationTemplateId, CardDesign> = {
         frame: 'bg-[#ede4db] border border-[#f7eee5] p-8 sm:p-14 rounded-[2.5rem] shadow-[18px_18px_42px_#d1c7bb,-18px_-18px_42px_#ffffff] text-center text-[#6f5b4b]',
         eyebrow: 'text-[#9b806b] tracking-[0.34em]',
         heading: 'text-[#6a5545]',
-        ampersand: 'text-[#C9B8A8]',
+        ampersand: 'text-[#8f7763]',
         message: 'text-[#7b6654]',
         dateBox: 'bg-[#ede4db] border-[#f8f1ea] shadow-[inset_8px_8px_18px_#d1c7bb,inset_-8px_-8px_18px_#ffffff]',
         dateText: 'text-[#6a5545]',
@@ -81,14 +82,14 @@ const cardDesigns: Record<InvitationTemplateId, CardDesign> = {
         label: 'Neumorphism Soft',
     },
     'gradient-wave-modern': {
-        frame: 'bg-white/10 backdrop-blur-2xl border border-[#D4AF37]/70 p-8 sm:p-14 rounded-[2rem] shadow-[0_45px_120px_rgba(51,8,103,0.28)] text-center text-white',
+        frame: 'bg-[#330867]/52 backdrop-blur-2xl border border-[#D4AF37]/70 p-8 sm:p-14 rounded-[2rem] shadow-[0_45px_120px_rgba(51,8,103,0.28)] text-center text-white',
         eyebrow: 'text-[#FEE140] tracking-[0.35em]',
         heading: 'text-white',
         ampersand: 'text-[#D4AF37]',
         message: 'text-white/90',
-        dateBox: 'bg-white/10 border-[#D4AF37]/60 backdrop-blur-xl',
+        dateBox: 'bg-[#330867]/34 border-[#D4AF37]/60 backdrop-blur-xl',
         dateText: 'text-[#FEE140]',
-        map: 'bg-white/10 border-[#D4AF37]/55 text-white backdrop-blur-xl rounded-2xl',
+        map: 'bg-[#330867]/34 border-[#D4AF37]/55 text-white backdrop-blur-xl rounded-2xl',
         mapFrame: 'rounded-xl border-[#D4AF37]/35',
         label: 'Gradient Wave Modern',
         decor: (
@@ -99,26 +100,26 @@ const cardDesigns: Record<InvitationTemplateId, CardDesign> = {
         ),
     },
     'dark-elegant-premium': {
-        frame: 'bg-[#1a1a1a] border border-[#FFD700]/55 p-8 sm:p-14 rounded-[1.5rem] shadow-[0_45px_120px_rgba(255,215,0,0.15)] text-center text-[#f8f3df]',
-        eyebrow: 'text-[#FFD700] tracking-[0.36em]',
-        heading: 'text-[#fff8d8] drop-shadow-[0_0_24px_rgba(255,215,0,0.22)]',
-        ampersand: 'text-[#FFD700]',
-        message: 'text-[#e8dfc0]',
-        dateBox: 'bg-[#2d2d2d] border-[#FFD700]/35',
-        dateText: 'text-[#FFD700]',
-        map: 'bg-[#2d2d2d] border-[#FFD700]/35 text-[#f8f3df] rounded-xl',
-        mapFrame: 'rounded-lg border-[#FFD700]/25',
+        frame: 'bg-[var(--invite-surface)] border border-[var(--invite-border)] p-8 sm:p-14 rounded-[1.5rem] shadow-[0_45px_120px_var(--invite-shadow)] text-center text-[var(--invite-text)]',
+        eyebrow: 'text-[var(--invite-accent)] tracking-[0.36em]',
+        heading: 'text-[var(--invite-text)] drop-shadow-[0_0_24px_var(--invite-shadow)]',
+        ampersand: 'text-[var(--invite-accent)]',
+        message: 'text-[var(--invite-text-muted)]',
+        dateBox: 'bg-[var(--invite-surface-soft)] border-[var(--invite-border)]',
+        dateText: 'text-[var(--invite-accent)]',
+        map: 'bg-[var(--invite-surface-soft)] border-[var(--invite-border)] text-[var(--invite-text)] rounded-xl',
+        mapFrame: 'rounded-lg border-[var(--invite-border)]',
         label: 'Dark Elegant Premium',
-        decor: <div className="absolute inset-0 opacity-35 [background-image:radial-gradient(#FFD700_1px,transparent_1px)] [background-size:34px_34px]" />,
+        decor: <div className="absolute inset-0 opacity-30 [background-image:radial-gradient(var(--invite-accent)_1px,transparent_1px)] [background-size:34px_34px]" />,
     },
     'floral-watercolor': {
         frame: 'bg-[#FFFEF9]/95 border border-[#FFE5E5] p-8 sm:p-14 rounded-[2rem] shadow-[0_35px_100px_rgba(186,144,198,0.16)] text-center text-[#7b4b52]',
-        eyebrow: 'text-[#BA90C6] tracking-[0.34em]',
+        eyebrow: 'text-[#8f5a9e] tracking-[0.34em]',
         heading: 'text-[#5d3441]',
-        ampersand: 'text-[#E8A0BF]',
+        ampersand: 'text-[#a24e7a]',
         message: 'text-[#7b4b52]',
         dateBox: 'bg-white/75 border-[#FFE5E5]',
-        dateText: 'text-[#BA90C6]',
+        dateText: 'text-[#8f5a9e]',
         map: 'bg-white/75 border-[#FFE5E5] text-[#5d3441] rounded-2xl',
         mapFrame: 'rounded-xl border-[#FFE5E5]',
         label: 'Floral Watercolor',
@@ -285,7 +286,7 @@ const cardDesigns: Record<InvitationTemplateId, CardDesign> = {
         frame: 'bg-white/95 border border-white p-8 sm:p-14 rounded-[2rem] shadow-[0_40px_110px_rgba(102,126,234,0.28)] text-center text-[#C44569]',
         eyebrow: 'text-[#FF6B9D] tracking-[0.34em]',
         heading: 'text-[#C44569]',
-        ampersand: 'text-[#FFA07A]',
+        ampersand: 'text-[#b8563d]',
         message: 'text-[#7c3551]',
         dateBox: 'bg-[#fff7fb] border-[#FF6B9D]/25',
         dateText: 'text-[#C44569]',
@@ -359,7 +360,7 @@ function ModernTemplate(props: TemplateRendererProps & { design: CardDesign }) {
                 <MessageBlock {...props} className={`font-cairo text-lg sm:text-2xl ${design.message}`} />
 
                 <motion.div variants={props.itemVariants} className={`my-10 rounded-2xl border px-5 py-6 ${design.dateBox}`}>
-                    <p className="mb-3 font-cairo text-xs font-bold opacity-70">
+                    <p className={`mb-3 font-cairo text-xs font-bold opacity-70 ${design.dateText}`}>
                         موعد الحفل
                     </p>
                     <p className={`font-playfair text-3xl ${design.dateText}`}>{props.formattedDate}</p>
