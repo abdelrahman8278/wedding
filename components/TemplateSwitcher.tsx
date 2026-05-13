@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FaPalette, FaXmark } from 'react-icons/fa6'
@@ -19,6 +19,7 @@ export default function TemplateSwitcher({ activeTemplate }: TemplateSwitcherPro
     const [isPending, startTransition] = useTransition()
     const [pendingTemplate, setPendingTemplate] = useState<InvitationTemplateId | null>(null)
     const [isOpen, setIsOpen] = useState(true)
+    const isMounted = useRef(false)
     const ui = getInvitationTemplateUi(activeTemplate)
     const isLoading = isPending || pendingTemplate !== null
 
@@ -28,8 +29,14 @@ export default function TemplateSwitcher({ activeTemplate }: TemplateSwitcherPro
         return () => window.clearTimeout(t)
     }, [activeTemplate, pendingTemplate])
 
-    // Close sidebar when template changes
-    useEffect(() => { setIsOpen(false) }, [activeTemplate])
+    // Close sidebar when template changes (skip first render)
+    useEffect(() => {
+        if (!isMounted.current) {
+            isMounted.current = true
+            return
+        }
+        setIsOpen(false)
+    }, [activeTemplate])
 
     // Close on Escape key
     useEffect(() => {
